@@ -1,0 +1,14 @@
+.container {
+    background: rgb(231, 223, 231);
+    margin: auto;
+    text-align: center;
+}
+
+.addTodo {
+    width: 80%;
+}
+
+.card {
+    width: 80%;
+    margin: auto;
+}
