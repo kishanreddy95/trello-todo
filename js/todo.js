@@ -1,6 +1,7 @@
 // For getting cards
 // https://api.trello.com/1/boards/{boardId}/cards
 // https://api.trello.com/1/boards/{boardId}/?cards=all
+//https://api.trello.com/1/cards/[card id]/checklist/[checklist id]/checkItem/[checkitem id]/state?key=[your api key]&token=[your trello token]&value=false
 
 
 // For perfoming actions just append /actions in place of cards
@@ -10,46 +11,6 @@ const token = '6eb43811bec9dab09bea76cc7327617fe3a990858ebf9e11962cd717165e37f5'
 const trelloLink = `https://api.trello.com/1/members/me/boards?key=${key}&token=${token}`;
 
 // Getting all cards from trello-todo-board
-
-// fetch(`https://api.trello.com/1/members/me/boards?key=${key}&token=${token}`).then((response) => {
-//   if (response.status !== 200) {
-//     console.log(`Data not found${response.status}`);
-//   } else {
-//     return response.json().then((board) => {
-//       return board[1].id ;
-//     });
-//   }
-// }).then((link) => {
-//    return fetch(`https://api.trello.com/1/boards/${link}/cards`).then((response) => {
-//       if(response.status !== 200) {
-//         console.log(`Data not found${response.status}`);
-//       } else {
-//         return response.json().then((cards) => {
-//           return cards;
-//          });
-//       }
-//     }).then((card) => {
-      
-//       let checkListIds = Object.keys(card).map((key) => {
-//         return (card[key].idChecklists);
-//       });
-//       console.log(checkListIds);
-//       let checkListId = checkListIds.map(id => id[0])
-//       console.log(checkListId);
-      
-//       fetch(`https://api.trello.com/1/checklists/${checkListIds[1][0]}?fields=all`).then((response) => {
-//         if(response.status !== 200) {
-//           console.log(`Data not found${response.status}`);
-//         } else {
-//           response.json().then((values) => {
-//             console.log(values);
-//           });
-//         }
-//       });
-//   });
-// })
-
-
 
 fetch(trelloLink)
   .then((response) => {
@@ -71,6 +32,7 @@ fetch(trelloLink)
     })
   })
   .then((cards) => {
+    console.log(cards);
     let checkLists = cards.map((card) => {
       return (card.idChecklists); //Getting every 
     }).reduce((acc, val) => {
@@ -97,11 +59,58 @@ fetch(trelloLink)
   })
   .then((arrayOfChecklists) => {
     controllers.appendIncompleteChecklists(arrayOfChecklists);
+    return arrayOfChecklists;
+  })
+  .then((arrayOfChecklists) => {
+        // JQuery for button clicks
+        $( "button" ).click(function() {
+          $(this).prev().css("text-decoration", "line-through");
+          let text = $(this).prev().text();
+          let checkItem = arrayOfChecklists.reduce((checkItem, checkitem) => {
+            if(checkitem.name == text) {
+              return checkitem;
+            }
+            return checkItem;
+          });
+          fetch(trelloLink)
+          .then((response) => {
+            return response.json();
+          })
+          .then((allBoards) => {
+            let boardRequired = allBoards.reduce((acc, val) => {
+              if(val.name == "Trello Todo Board") {
+                return val;
+              }
+              return acc;
+            }, {});
+            return boardRequired;
+          })
+          .then((board) => {
+            return fetch(`https://api.trello.com/1/boards/${board.id}/cards`).then((response) => {
+              return response.json();
+            })
+          }).then((cards) => {
+            let cardId = cards.reduce((cardId, card) => {
+              if(card.idChecklists.indexOf(checkItem.idChecklist) != -1) {
+                return card.id;
+              }
+              return cardId;
+            },{});
+            return cardId;
+          }).then((cardId) => {
+            var request = new Request(`https://api.trello.com/1/cards/${cardId}/checklist/${checkItem.idChecklist}/checkItem/${checkItem.id}/state?key=${key}&token=${token}&value=true`, {
+              method: 'PUT', 
+            });
+            fetch(request).then((response) => {
+              console.log(response);
+            });
+          });
+        });
   });
 
 
 
-// Functions for updating the dom.
+// Functions for updating the dom
 
 let controllers = {
   appendIncompleteChecklists: function(checkListItems) {
@@ -113,5 +122,6 @@ let controllers = {
         </div>`);
       }
     });
-  }
+  },
 };
+
