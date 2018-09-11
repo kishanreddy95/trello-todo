@@ -1,0 +1,19 @@
+{
+  "name": "trello-todo-kishanreddy",
+  "version": "1.0.0",
+  "description": "Trello Todo with custom api and db",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [
+    "trello",
+    "api",
+    "database"
+  ],
+  "author": "kishan.reddy@mountblue.io",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.3"
+  }
+}
