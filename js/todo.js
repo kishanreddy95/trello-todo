@@ -28,12 +28,12 @@ fetch(trelloLink)
   })
   .then((board) => {
     return fetch(`https://api.trello.com/1/boards/${board.id}/cards`).then((response) => {
-      console.log(response);
+      // console.log(response);
       return response.json();
     })
   })
   .then((cards) => {
-    console.log(cards);
+    // console.log(cards);
     let checkLists = cards.map((card) => {
       return (card.idChecklists); //Getting every id of checklistss
     }).reduce((acc, val) => {
@@ -66,13 +66,14 @@ fetch(trelloLink)
     // JQuery for button clicks
     $("button").click(function () {
       $(this).prev().css("text-decoration", "line-through");
-      let text = $(this).prev().text();
+      let id = $(this).attr('id');
       let checkItem = arrayOfChecklists.reduce((checkItem, checkitem) => {
-        if (checkitem.name == text) {
+        if (checkitem.id == id) {
           return checkitem;
         }
         return checkItem;
       });
+      console.log(checkItem);
       fetch(trelloLink)
         .then((response) => {
           return response.json();
@@ -92,6 +93,7 @@ fetch(trelloLink)
           })
         })
         .then((cards) => {
+          console.log(cards);
           let cardId = cards.reduce((cardId, card) => {
             if (card.idChecklists.indexOf(checkItem.idChecklist) != -1) {
               return card.id;
@@ -101,12 +103,12 @@ fetch(trelloLink)
           return cardId;
         })
         .then((cardId) => {
-          let request = new Request(`https://api.trello.com/1/cards/${cardId}/checklist/${checkItem.idChecklist}/checkItem/${checkItem.id}/state?key=${key}&token=${token}&value=true`, {
+          let request = new Request(`https://api.trello.com/1/cards/${cardId}/checkItem/${checkItem.id}?key=${key}&token=${token}&state=complete`, {
             method: 'PUT',
           });
           fetch(request)
             .then((response) => {
-              console.log(response);
+              // console.log(response);
             });
         });
     });
@@ -120,10 +122,11 @@ fetch(trelloLink)
 let controllers = {
   appendIncompleteChecklists: function (checkListItems) {
     checkListItems.forEach((checklist) => {
+      console.log(checklist.id);
       if (checklist.state == 'incomplete') {
         $(".list-group").append(`<div class="row">
         <p class="list-group-item list-group-item-secondary col-md-11">${checklist.name}</p>
-        <button class="btn btn-dark col-md-1" type="button">Done</button>
+        <button id=${checklist.id} class="btn btn-dark col-md-1" type="button">Done</button>
         </div>`);
       }
     });
