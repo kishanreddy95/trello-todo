@@ -10,8 +10,11 @@ const obj = {
     age: 23,
   },
 };
-app.get('/', (req, res) => {
-  res.send(obj);
+
+
+app.get('/name', (req, res) => {
+  req.params = obj.data;
+  res.json(req.params);
 });
 
 app.listen(3000, () => console.log('listening on port 3000'));
