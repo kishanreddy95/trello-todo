@@ -10,7 +10,7 @@ const obj = {
     age: 23,
   },
 };
-app.post('/', (req, res) => {
+app.get('/', (req, res) => {
   res.send(obj);
 });
 
