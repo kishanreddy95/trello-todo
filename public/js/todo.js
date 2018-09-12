@@ -1,8 +1,17 @@
 
-fetch('../index.js').then((response) => {
-  console.log(response);
+let object = fetch('/obj').then((response) => {
+  console.log(response.json());
 });
 
+// $(document).ready(()=>{
+//   $.ajax({
+//     url : '/obj',
+//     type : 'GET',
+//     data : 'json',
+//   }).done(data=>{
+//     console.log(data);
+//   })
+// })
 
 // Functions for updating the dom
 

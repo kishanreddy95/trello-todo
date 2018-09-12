@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 
 const app = express();
 
@@ -11,10 +12,18 @@ const obj = {
   },
 };
 
+app.use(express.static('public'));
+app.use(express.json());
 
-app.get('/name', (req, res) => {
-  req.params = obj.data;
-  res.json(req.params);
+app.get('/obj', (req, res) => {
+  console.log('here');
+  res.send(obj);
+});
+app.post('/obj', (req, res) => {
+  let abc =req.body;
+  console.log(abc);
+  let xyz =req.body;
+  res.send(xyz);
 });
 
 app.listen(3000, () => console.log('listening on port 3000'));
