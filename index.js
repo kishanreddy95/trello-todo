@@ -1,97 +1,71 @@
 const express = require('express');
-const path = require('path');
+const sqlite = require('sqlite');
+const Promise = require('bluebird');
+const dataBaseFunctions = require('./db.js');
 
+const db = sqlite.open('./trello.sqlite', { Promise });
 const app = express();
-
-// app.get('/', (req, res) => res.send('hello world'));
-
-const List = [
-  {
-    name: 'kishan',
-    id: 1,
-  },
-];
-
-const ListItems = [
-  {
-    listId: 1,
-    id: 1,
-    content: 'hello',
-    status: 'false',
-  },
-  {
-    listId: 2,
-    id: 7,
-    content: 'okay',
-    status: 'false',
-  },
-  {
-    listId: 1,
-    id: 3,
-    content: 'alright',
-    status: 'false',
-  },
-];
 
 app.use(express.static('public'));
 app.use(express.json());
 
-
 // All Lists available
 app.get('/lists', (req, res) => {
-  res.send(List);
 });
 
 app.post('/lists', (req, res) => {
-  const newList = {
-    name: req.body.name,
-    id: req.body.id,
-  };
-  List.push(newList);
-  console.log(req.body);
-  res.send(newList);
+  db.then((data) => {
+    dataBaseFunctions.createTable(data);
+    return data;
+  }).then((data) => {
+    const { id } = req.body;
+    const { name } = req.body;
+    console.log(req.body);
+    dataBaseFunctions.insertTableLists(data, id, name);
+    res.send('done');
+  });
 });
 
 // Getting or deleting a particular List
 
 app.get('/lists/:listId', (req, res) => {
-  const listReq = List.filter((list) => {
-    if (parseInt(req.params.listId) === list.id) {
-      return list;
-    }
-  });
-  res.send(listReq);
+  db.then(data => dataBaseFunctions.selectTableLists(data, req.params.listId))
+    .then((resp) => {
+      res.send(resp);
+    });
 });
 
 app.delete('/lists/:listId', (req, res) => {
-  List.forEach((list, index) => {
-    if (req.params.listId === list.id) {
-      List.splice(index, 1);
-    }
-  });
+  db.then(data => dataBaseFunctions.deleteTableLists(data, req.params.listId));
   res.send('done');
 });
 
 // Getting and Creating list items
 
 app.get('/list/:listId/items', (req, res) => {
-  const listItems = ListItems.filter((item) => {
-    if (parseInt(req.params.listId) === item.listId) {
-      return item;
-    }
-  });
-  res.send(listItems);
+  // const listItems = ListItems.filter((item) => {
+  //   if (parseInt(req.params.listId) === item.listId) {
+  //     return item;
+  //   }
+  // });
+  // res.send(listItems);
 });
 
 app.post('/list/:listId/items', (req, res) => {
-  const item = {
-    listId: parseInt(req.params.listId),
-    id: req.body.id,
-    content: req.body.content,
-    status: 'false',
-  };
-  ListItems.push(item);
-  res.send(item);
+  // const item = {
+  //   listId: parseInt(req.params.listId),
+  //   id: req.body.id,
+  //   content: req.body.content,
+  //   status: 'false',
+  // };
+  // ListItems.push(item);
+  // res.send(item);
+  db.then((data) => {
+    dataBaseFunctions.createTableItems(data);
+    return data;
+  }).then((data) => {
+    
+  })
 });
 
 
