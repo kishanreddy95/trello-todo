@@ -11,98 +11,96 @@ app.use(express.json());
 
 // All Lists available
 app.get('/lists', (req, res) => {
-  db.then(dbFile => dataBaseFunctions.getAllTableLists(dbFile))
+  db.then(() => dataBaseFunctions.getAllTableLists())
     .then((lists) => {
       res.send(lists);
     });
 });
 
 app.post('/lists', (req, res) => {
-  db.then((data) => {
-    dataBaseFunctions.createTable(data);
-    return data;
-  }).then((data) => {
-    // const { id } = req.body;
+  db.then(() => {
+    dataBaseFunctions.createTable();
+  }).then(() => {
     const { name } = req.body;
-    console.log(req.body);
-    dataBaseFunctions.insertTableLists(data, name);
-    res.send('done');
+    return dataBaseFunctions.insertTableLists(name);
+  }).then((list) => {
+    res.send(list);
   });
 });
 
 // Getting or deleting a particular List
 
 app.get('/lists/:listId', (req, res) => {
-  db.then(data => dataBaseFunctions.selectTableLists(data, req.params.listId))
+  db.then(() => dataBaseFunctions.selectTableLists(req.params.listId))
     .then((resp) => {
       res.send(resp);
     });
 });
 
 app.delete('/lists/:listId', (req, res) => {
-  db.then(data => dataBaseFunctions.deleteTableLists(data, req.params.listId));
-  res.send('done');
+  db.then(() => dataBaseFunctions.deleteTableLists(req.params.listId))
+    .then((list) => {
+      res.send(list);
+    });
 });
 
 // Getting and Creating list items
 
 app.get('/list/:listId/items', (req, res) => {
-  db.then((dbFile) => {
+  db.then(() => {
     const listId = parseInt(req.params.listId, 10);
-    return dataBaseFunctions.getAllTableItems(dbFile, listId);
+    return dataBaseFunctions.getAllTableItems(listId);
   }).then((items) => {
     res.send(items);
   });
 });
 
 app.post('/list/:listId/items', (req, res) => {
-  db.then((dbFile) => {
-    dataBaseFunctions.createItemTable(dbFile);
-    return dbFile;
-  }).then((dbFile) => {
-    const item = {
-      content: req.body.content,
-      status: 'false',
-      listId: parseInt(req.params.listId, 10),
-    };
-    dataBaseFunctions.createTableItems(dbFile, item);
-    res.send(item);
-  });
+  db.then(() => dataBaseFunctions.createItemTable())
+    .then(() => {
+      const item = {
+        content: req.body.content,
+        status: 'false',
+        listId: parseInt(req.params.listId, 10),
+      };
+      dataBaseFunctions.createTableItems(item);
+      res.send(item);
+    });
 });
 
 
 // Getting, Updating and Deleting individual list items
 
 app.get('/list/:listId/items/:itemId', (req, res) => {
-  db.then((dbFile) => {
+  db.then(() => {
     const listId = parseInt(req.params.listId, 10);
     const itemId = parseInt(req.params.itemId, 10);
-    return dataBaseFunctions.getSpecificItem(dbFile, itemId, listId);
+    return dataBaseFunctions.getSpecificItem(itemId, listId);
   }).then((item) => {
     res.send(item);
   });
 });
 
 app.put('/list/:listId/items/:itemId', (req, res) => {
-  db.then((dbFile) => {
+  db.then(() => {
     const item = {
       listId: parseInt(req.params.listId, 10),
       itemId: parseInt(req.params.itemId, 10),
       status: req.body.status,
     };
-    return dataBaseFunctions.addItem(dbFile, item);
+    return dataBaseFunctions.updateItem(item);
   }).then((updatedItem) => {
     res.send(updatedItem);
   });
 });
 
 app.delete('/list/:listId/items/:itemId', (req, res) => {
-  db.then((dbFile) => {
+  db.then(() => {
     const listId = parseInt(req.params.listId, 10);
     const itemId = parseInt(req.params.itemId, 10);
-    return dataBaseFunctions.deleteItem(dbFile, itemId, listId);
-  }).then(() => {
-    res.send('deleted item succesfully');
+    return dataBaseFunctions.deleteItem(itemId, listId);
+  }).then((deletedItem) => {
+    res.send(deletedItem);
   });
 });
 
