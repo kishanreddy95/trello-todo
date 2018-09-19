@@ -11,6 +11,10 @@ app.use(express.json());
 
 // All Lists available
 app.get('/lists', (req, res) => {
+  db.then(dbFile => dataBaseFunctions.getAllTableLists(dbFile))
+    .then((lists) => {
+      res.send(lists);
+    });
 });
 
 app.post('/lists', (req, res) => {
@@ -18,10 +22,10 @@ app.post('/lists', (req, res) => {
     dataBaseFunctions.createTable(data);
     return data;
   }).then((data) => {
-    const { id } = req.body;
+    // const { id } = req.body;
     const { name } = req.body;
     console.log(req.body);
-    dataBaseFunctions.insertTableLists(data, id, name);
+    dataBaseFunctions.insertTableLists(data, name);
     res.send('done');
   });
 });
@@ -43,60 +47,63 @@ app.delete('/lists/:listId', (req, res) => {
 // Getting and Creating list items
 
 app.get('/list/:listId/items', (req, res) => {
-  // const listItems = ListItems.filter((item) => {
-  //   if (parseInt(req.params.listId) === item.listId) {
-  //     return item;
-  //   }
-  // });
-  // res.send(listItems);
+  db.then((dbFile) => {
+    const listId = parseInt(req.params.listId, 10);
+    return dataBaseFunctions.getAllTableItems(dbFile, listId);
+  }).then((items) => {
+    res.send(items);
+  });
 });
 
 app.post('/list/:listId/items', (req, res) => {
-  // const item = {
-  //   listId: parseInt(req.params.listId),
-  //   id: req.body.id,
-  //   content: req.body.content,
-  //   status: 'false',
-  // };
-  // ListItems.push(item);
-  // res.send(item);
-  db.then((data) => {
-    dataBaseFunctions.createTableItems(data);
-    return data;
-  }).then((data) => {
-    
-  })
+  db.then((dbFile) => {
+    dataBaseFunctions.createItemTable(dbFile);
+    return dbFile;
+  }).then((dbFile) => {
+    const item = {
+      content: req.body.content,
+      status: 'false',
+      listId: parseInt(req.params.listId, 10),
+    };
+    dataBaseFunctions.createTableItems(dbFile, item);
+    res.send(item);
+  });
 });
 
 
 // Getting, Updating and Deleting individual list items
 
 app.get('/list/:listId/items/:itemId', (req, res) => {
-  const listItem = ListItems.filter((item) => {
-    if (item.listId === parseInt(req.params.listId) && item.id === parseInt(req.params.itemId)) {
-      return item;
-    }
+  db.then((dbFile) => {
+    const listId = parseInt(req.params.listId, 10);
+    const itemId = parseInt(req.params.itemId, 10);
+    return dataBaseFunctions.getSpecificItem(dbFile, itemId, listId);
+  }).then((item) => {
+    res.send(item);
   });
-  res.send(listItem);
 });
 
-app.post('/list/:listId/items/:itemId', (req, res) => {
-  ListItems.forEach((item) => {
-    if (item.listId === parseInt(req.params.listId) && item.id === parseInt(req.params.itemId)) {
-      item.content = req.body.content;
-      item.status = req.body.status;
-    }
+app.put('/list/:listId/items/:itemId', (req, res) => {
+  db.then((dbFile) => {
+    const item = {
+      listId: parseInt(req.params.listId, 10),
+      itemId: parseInt(req.params.itemId, 10),
+      status: req.body.status,
+    };
+    return dataBaseFunctions.addItem(dbFile, item);
+  }).then((updatedItem) => {
+    res.send(updatedItem);
   });
-  res.send(ListItems);
 });
 
 app.delete('/list/:listId/items/:itemId', (req, res) => {
-  ListItems.forEach((item, index) => {
-    if (item.listId === parseInt(req.params.listId) && item.id === parseInt(req.params.itemId)) {
-      ListItems.splice(index, 1);
-    }
+  db.then((dbFile) => {
+    const listId = parseInt(req.params.listId, 10);
+    const itemId = parseInt(req.params.itemId, 10);
+    return dataBaseFunctions.deleteItem(dbFile, itemId, listId);
+  }).then(() => {
+    res.send('deleted item succesfully');
   });
-  res.send(ListItems);
 });
 
 app.listen(3000, () => console.log('listening on port 3000'));

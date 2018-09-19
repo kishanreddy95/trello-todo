@@ -1,15 +1,15 @@
 .container {
-    background: rgb(62, 155, 243);
+    background: rgba(214, 26, 26, 0.5);
     margin: auto; 
     text-align: center;
 }
 
 .addTodo {
-    width: 80%;
-    margin: auto;
+    /* width: 100%; */
+    /* margin: auto; */
 }
 
 .card {
-    width: 80%;
-    margin: auto;
+    /* width: 80%; */
+    /* margin: auto; */
 }
