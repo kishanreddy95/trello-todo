@@ -1,8 +1,8 @@
 
 // Global key and token values
 
-const key = '8e88c7a234c5ae0df7a0ca91a6894d69';
-const token = '6eb43811bec9dab09bea76cc7327617fe3a990858ebf9e11962cd717165e37f5';
+const key = '';
+const token = '';
 const trelloLink = `https://api.trello.com/1/members/me/boards?key=${key}&token=${token}`;
 
 // Getting all cards from trello-todo-board
